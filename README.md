@@ -4,6 +4,7 @@ This project is a web scraper that runs every morning at 8 EST and gets all subm
 
 ## How to run locally
 
+- Navigate to `chrome://version` and download the same major version that you are currently running
 - [Download a version of chromedriver for your operating system](https://chromedriver.chromium.org/downloads)
 - Save this to the root directory of this project with name chromedriver
 
