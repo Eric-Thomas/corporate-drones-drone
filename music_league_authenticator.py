@@ -1,0 +1,72 @@
+import time
+import os
+
+from selenium.webdriver import Chrome
+from selenium.webdriver.common.by import By
+from bs4 import BeautifulSoup
+
+from exceptions import (
+    NoSpotifyUsernameException,
+    NoSpotifyPasswordException,
+    SpotifyAuthenticationException,
+)
+
+
+class MusicLeagueAuthenticator:
+
+    CORPORATE_DRONES_URL = (
+        "https://app.musicleague.com/l/4b82d7c3ca0e4d5db2d9807e3f1da0cc"
+    )
+
+    def __init__(self, browser: Chrome):
+        self.browser = browser
+
+    def authenticate(self, callback_url=CORPORATE_DRONES_URL):
+        self.browser.get(callback_url)
+        self._go_to_spotify_login()
+        self._enter_spotify_credentials()
+        time.sleep(7)
+        self._validate_login()
+        self._agree_to_authenticate()
+
+    def _go_to_spotify_login(self):
+        login_button = self.browser.find_element(By.LINK_TEXT, "Log In With Spotify")
+        print("Clicking on login button")
+        login_button.click()
+
+    def _enter_spotify_credentials(self):
+        print("Entering username and password")
+        username_field = self.browser.find_element(By.ID, "login-username")
+        username = self._get_username()
+        username_field.send_keys(username)
+        password_field = self.browser.find_element(By.ID, "login-password")
+        password = self._get_passowrd()
+        password_field.send_keys(password)
+        print("Authenticating")
+        spotify_login_button = self.browser.find_element(By.ID, "login-button")
+        spotify_login_button.click()
+
+    def _get_username(self):
+        if os.environ.get("SPOTIFY_USERNAME") is None:
+            raise NoSpotifyUsernameException()
+
+        return os.environ.get("SPOTIFY_USERNAME")
+
+    def _get_passowrd(self):
+        if os.environ.get("SPOTIFY_PASSWORD") is None:
+            raise NoSpotifyPasswordException()
+
+        return os.environ.get("SPOTIFY_PASSWORD")
+
+    def _validate_login(self):
+        soup = BeautifulSoup(self.browser.page_source, "html.parser")
+        if "Agree" not in soup.get_text():
+            raise SpotifyAuthenticationException()
+
+    def _agree_to_authenticate(self):
+        # Crazy CSS selector. Hoping this doesn't change or it will break everything lol
+        agree_button = self.browser.find_element(
+            By.CSS_SELECTOR, ".Type__TypeElement-goli3j-0.dmuHFl.sc-iCfMLu.cRxwZP"
+        )
+        agree_button.click()
+        time.sleep(5)
