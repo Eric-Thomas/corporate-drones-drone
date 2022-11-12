@@ -1,14 +1,16 @@
 import os
-
 from selenium import webdriver
 
 from music_league_authenticator import MusicLeagueAuthenticator
+from scraper import Scraper
 
 
 def main():
     browser = get_chrome_browser()
     music_league_authenticator = MusicLeagueAuthenticator(browser)
     music_league_authenticator.authenticate()
+    scraper = Scraper(browser)
+    scraper.scrape_rounds()
     browser.quit()
 
 

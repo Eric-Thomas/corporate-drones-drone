@@ -29,3 +29,14 @@ class SpotifyAuthenticationException(Exception):
     ):
         self.message = message
         super().__init__(self.message)
+
+
+class HTMLParserException(Exception):
+    """Exception raised when spotify authentication failed"""
+
+    def __init__(
+        self,
+        message="Error parsing HTML",
+    ):
+        self.message = message
+        super().__init__(self.message)
