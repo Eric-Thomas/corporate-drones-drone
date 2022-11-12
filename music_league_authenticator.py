@@ -25,7 +25,7 @@ class MusicLeagueAuthenticator:
         self.browser.get(callback_url)
         self._go_to_spotify_login()
         self._enter_spotify_credentials()
-        time.sleep(7)
+        time.sleep(2)
         self._validate_login()
         self._agree_to_authenticate()
 
