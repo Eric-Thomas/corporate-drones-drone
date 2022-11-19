@@ -6,6 +6,9 @@ from scraper import Scraper
 from s3_service import S3Service
 
 
+def handler(event, context):
+    main()
+
 def main():
     browser = get_chrome_browser()
     music_league_authenticator = MusicLeagueAuthenticator(browser)

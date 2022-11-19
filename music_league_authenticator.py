@@ -10,6 +10,7 @@ from exceptions import (
     NoSpotifyPasswordException,
     SpotifyAuthenticationException,
 )
+from secret_manager_service import get_spotify_password
 
 
 class MusicLeagueAuthenticator:
@@ -53,6 +54,10 @@ class MusicLeagueAuthenticator:
         return os.environ.get("SPOTIFY_USERNAME")
 
     def _get_passowrd(self):
+        # fetch secret from aws secrets manager if in prod
+        if os.environ.get("RUNTIME_ENV") == "prod":
+            os.environ['SPOTIFY_PASSWORD'] = get_spotify_password()
+
         if os.environ.get("SPOTIFY_PASSWORD") is None:
             raise NoSpotifyPasswordException()
 
