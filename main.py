@@ -29,18 +29,22 @@ def get_chrome_browser() -> webdriver.Chrome:
         browser = webdriver.Chrome()
     return browser
 
+
 def _pretty_print_rounds_results(rounds_results):
     for round_name, submissions in rounds_results.items():
         print(round_name)
         for submission in submissions:
-            print(f"{submission['song']} - {submission['artist']} submitted by {submission['submitter_name']} with {submission['number_of_votes']} votes")
-            for name, num_of_votes in submission['voters'].items():
+            print(
+                f"{submission['song']} - {submission['artist']} submitted by {submission['submitter_name']} with {submission['number_of_votes']} votes"
+            )
+            for name, num_of_votes in submission["voters"].items():
                 if num_of_votes == 1:
                     print(f"{name} gave {num_of_votes} upvote")
                 else:
                     print(f"{name} gave {num_of_votes} upvotes")
-            print('\n')
+            print("\n")
         print("=" * 25)
+
 
 if __name__ == "__main__":
     main()

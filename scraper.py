@@ -73,11 +73,11 @@ class Scraper:
         # Second child is an empty string?? idk why
         for submission_div in submission_divs[2:]:
             submission = {}
-            submission['song'] = self._get_song_name(submission_div)
-            submission['artist'] = self._get_artist_name(submission_div)
-            submission['submitter_name'] = self._get_submitter_name(submission_div)
-            submission['number_of_votes'] = self._get_number_of_votes(submission_div)
-            submission['voters'] = self._get_voters(submission_div)
+            submission["song"] = self._get_song_name(submission_div)
+            submission["artist"] = self._get_artist_name(submission_div)
+            submission["submitter_name"] = self._get_submitter_name(submission_div)
+            submission["number_of_votes"] = self._get_number_of_votes(submission_div)
+            submission["voters"] = self._get_voters(submission_div)
             submissions.append(submission)
 
         return submissions
