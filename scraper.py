@@ -5,17 +5,19 @@ from selenium.webdriver import Chrome
 from bs4 import BeautifulSoup
 
 from exceptions import HTMLParserException
-from submission import Submission
 
 
 class Scraper:
     def __init__(self, browser: Chrome):
         self.browser = browser
 
-    def scrape_rounds(self) -> Dict:
+    def scrape_rounds(self, ignore) -> Dict:
         round_results_links = self._get_rounds_hrefs()
         rounds = {}
         for round_name, link in round_results_links.items():
+            if round_name in ignore:
+                print(f"{round_name} has already been scraped. Skipping")
+                continue
             print(f"Getting rounds results for {round_name}")
             rounds[round_name] = self._get_round_results(link)
 
@@ -70,14 +72,12 @@ class Scraper:
         # First child div is the round name so we don't need it
         # Second child is an empty string?? idk why
         for submission_div in submission_divs[2:]:
-            song_name = self._get_song_name(submission_div)
-            artist_name = self._get_artist_name(submission_div)
-            submitter_name = self._get_submitter_name(submission_div)
-            number_of_votes = self._get_number_of_votes(submission_div)
-            voters = self._get_voters(submission_div)
-            submission = Submission(
-                song_name, artist_name, submitter_name, number_of_votes, voters
-            )
+            submission = {}
+            submission["song"] = self._get_song_name(submission_div)
+            submission["artist"] = self._get_artist_name(submission_div)
+            submission["submitter_name"] = self._get_submitter_name(submission_div)
+            submission["number_of_votes"] = self._get_number_of_votes(submission_div)
+            submission["voters"] = self._get_voters(submission_div)
             submissions.append(submission)
 
         return submissions
