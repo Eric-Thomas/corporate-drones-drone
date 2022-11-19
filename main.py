@@ -10,7 +10,12 @@ def main():
     music_league_authenticator = MusicLeagueAuthenticator(browser)
     music_league_authenticator.authenticate()
     scraper = Scraper(browser)
-    scraper.scrape_rounds()
+    rounds = scraper.scrape_rounds()
+    for round_name, submissions in rounds.items():
+        print(round_name)
+        for submission in submissions:
+            print(submission)
+        print("=" * 25)
     browser.quit()
 
 
