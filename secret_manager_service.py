@@ -1,10 +1,12 @@
+import json
+
 import boto3
 from botocore.exceptions import ClientError
 
 
 def get_spotify_password():
 
-    secret_name = "SPOTIFY_PASSWORD"
+    secret_name = "MY_SPOTIFY_PASSWORD"
     region_name = "us-east-1"
 
     # Create a Secrets Manager client
@@ -24,4 +26,4 @@ def get_spotify_password():
         raise e
 
     # Decrypts secret using the associated KMS key.
-    return get_secret_value_response['SPOTIFY_PASSWORD']
+    return json.loads(get_secret_value_response['SecretString'])['SPOTIFY_PASSWORD']
