@@ -6,7 +6,7 @@ from botocore.exceptions import ClientError
 
 def get_spotify_password():
 
-    secret_name = "MY_SPOTIFY_PASSWORD"
+    secret_name = "NEW_SPOTIFY_PASSWORD"
     region_name = "us-east-1"
 
     # Create a Secrets Manager client
