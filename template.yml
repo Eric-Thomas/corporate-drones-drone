@@ -1,0 +1,20 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Description: Web scraper for Corporate Drones Music League
+      Handler: main.handler
+      Runtime: python3.7
+      MemorySize: 512
+      Role: arn:aws:iam::373505631200:role/Lambda_role
+      Timeout: 600
+      CodeUri: .
+      Layers: [arn:aws:lambda:us-east-1:373505631200:layer:chromedriver:8]
+      Environment:
+        Variables:
+          SPOTIFY_USERNAME: bluedevils027
+          RUNTIME_ENV: prod

@@ -10,12 +10,9 @@ This project is a web scraper that runs every morning at 8 EST and gets all subm
 
 **Note**: `chromedriver_prod` will be used in production as a headless linux driver. Local development will use a whichever chromedriver you have in the project
 
-- [Install pipenv if you don't already have it](https://pypi.org/project/pipenv/)
-
 #### Install dependencies
 ```
-pipenv shell
-pipenv sync --dev
+pip install -r requirements.txt
 ```
 
 #### Export Env variables
@@ -27,3 +24,16 @@ export SPOTIFY_PASSWORD={SPOTIFY_PASSWORD}
 
 #### Run main file
 `python3 main.py`
+
+
+## Deployment
+This uses [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html#install-sam-cli-instructions) to run deployments
+
+Lambda layer `arn:aws:lambda:us-east-1:373505631200:layer:chromedriver:8` holds the headless chromium and chrome driver. Lot of version issues with python version, selenium, and the chromium/chrome driver. Versions used are [serverless-chrome v1.0.0.37](https://github.com/adieuadieu/serverless-chrome/releases/download/v1.0.0-37/stable-headless-chromium-amazonlinux-2017-03.zip) [chromedriver 2.37](https://chromedriver.storage.googleapis.com/2.37/chromedriver_linux64.zip)
+
+
+To deploy run
+```
+sam build
+sam deploy
+```
