@@ -3,3 +3,5 @@ chromedriver
 __pycache__
 .aws-sam
 samconfig.toml
+venv
+env
