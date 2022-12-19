@@ -15,9 +15,8 @@ from secret_manager_service import get_spotify_password
 
 class MusicLeagueAuthenticator:
 
-    CORPORATE_DRONES_URL = (
-        "https://app.musicleague.com/l/4b82d7c3ca0e4d5db2d9807e3f1da0cc"
-    )
+    CORPORATE_DRONES_URL = "https://app.musicleague.com/l/4b82d7c3ca0e4d5db2d9807e3f1da0cc"
+    DICTATOR_LEAGUE_URL = "https://app.musicleague.com/l/65b91ad3889548ed8fd68315754def8e"
 
     def __init__(self, browser: Chrome):
         self.browser = browser
