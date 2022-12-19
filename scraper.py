@@ -1,5 +1,7 @@
 import time
 from typing import Dict
+from xml.dom.minidom import Attr
+import bs4
 
 from selenium.webdriver import Chrome
 from bs4 import BeautifulSoup
@@ -109,27 +111,35 @@ class Scraper:
         voting_info_div = song_info_div_container.contents[4]
         number_of_votes = voting_info_div.find("span").get_text()
 
-        # First character of number_of_votes is + so we just take the 10 from number_of_votes = '+10'
-        return number_of_votes[1:]
+        # Convert number of votes to an int. Votes can be positive or negative
+        return int(str(number_of_votes))
 
     def _get_voters(self, submission_div):
         voters = {}
         # voter divs start at the 5th div and each div holds voter info
         for voter_div_container in submission_div.contents[4:]:
             voter_name = voter_div_container.find("span", class_="fs-6").get_text()
-            spans = voter_div_container.find_all("span")
-            num_of_upvotes = 0
-            for span in spans:
-                # If the text has a + its the nubmer of upvtes. Chop of '+' and just take the number
-                if "+" in span.get_text():
-                    num_of_upvotes = span.get_text()[1:]
-                    break
+            try:
+                voter_span = voter_div_container.find("span", class_="fs-5")
+                num_of_upvotes = 0
+                # When it is a positive number of votes, the vote number is nested in a span within a span
+                # Ex:
+                # 
+                # <span class="d-inline-block align-middle mx-2 fs-5">
+                #   <span class="">+1</span>
+                # </span>
+                if isinstance(voter_span.contents[0], bs4.element.Tag):
+                    num_of_upvotes = int(str(voter_span.contents[0].contents[0]))
 
-            # If someone comments they still show up as a child element of the submission_div
-            # But where the '+' would normally go is an empty span so we won't include them in the voters
-            if num_of_upvotes == 0:
+                # When it is a negative number of votes, the vote number is the contents of the fs-5 span
+                # <span class="d-inline-block align-middle mx-2 fs-5" style="color: red;">-1</span>
+                else:
+                    num_of_upvotes = int(str(voter_span.contents[0]))
+                voters[voter_name] = num_of_upvotes
+            except AttributeError:
+                # If someone comments they still show up as a child element of the submission_div
+                # However there will be no span with class fs-5 so we get attribute error
+                # We don't add them to the number of voters since they just commented
                 continue
-
-            voters[voter_name] = num_of_upvotes
 
         return voters
