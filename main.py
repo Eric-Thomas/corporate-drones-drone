@@ -10,15 +10,17 @@ def handler(event, context):
     main()
 
 def main():
-    browser = get_chrome_browser()
-    music_league_authenticator = MusicLeagueAuthenticator(browser)
-    music_league_authenticator.authenticate()
-    scraper = Scraper(browser)
-    s3_service = S3Service()
-    rounds_results = scraper.scrape_rounds(ignore=s3_service.existing_round_names)
-    _pretty_print_rounds_results(rounds_results)
-    browser.quit()
-    s3_service.write_rounds_results(rounds_results)
+    try:
+        browser = get_chrome_browser()
+        music_league_authenticator = MusicLeagueAuthenticator(browser)
+        music_league_authenticator.authenticate()
+        scraper = Scraper(browser)
+        s3_service = S3Service()
+        rounds_results = scraper.scrape_rounds(ignore=s3_service.existing_round_names)
+        _pretty_print_rounds_results(rounds_results)
+        s3_service.write_rounds_results(rounds_results)
+    finally:
+        browser.quit()
 
 
 def get_chrome_browser() -> webdriver.Chrome:
@@ -39,13 +41,15 @@ def get_chrome_browser() -> webdriver.Chrome:
         return webdriver.Chrome()
 
 def _pretty_print_rounds_results(rounds_results):
-    for round_name, submissions in rounds_results.items():
-        print(round_name)
-        for submission in submissions:
+    for round in rounds_results:
+        print(round['round_name'])
+        for submission in round['results']:
             print(
                 f"{submission['song']} - {submission['artist']} submitted by {submission['submitter_name']} with {submission['number_of_votes']} votes"
             )
-            for name, num_of_votes in submission["voters"].items():
+            for voter in submission["voters"]:
+                num_of_votes = voter['num_of_votes']
+                name = voter['voter_name']
                 if num_of_votes == 1 or num_of_votes == -1:
                     print(f"{name} gave {num_of_votes} upvote")
                 else:

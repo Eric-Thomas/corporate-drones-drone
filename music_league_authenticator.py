@@ -21,7 +21,7 @@ class MusicLeagueAuthenticator:
     def __init__(self, browser: Chrome):
         self.browser = browser
 
-    def authenticate(self, callback_url=CORPORATE_DRONES_URL):
+    def authenticate(self, callback_url=DICTATOR_LEAGUE_URL):
         self.browser.get(callback_url)
         self._go_to_spotify_login()
         self._enter_spotify_credentials()
