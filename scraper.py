@@ -1,6 +1,5 @@
 import time
 from typing import Dict
-from xml.dom.minidom import Attr
 import bs4
 
 from selenium.webdriver import Chrome
@@ -14,39 +13,52 @@ class Scraper:
         self.browser = browser
 
     def scrape_rounds(self, ignore) -> Dict:
-        round_results_links = self._get_rounds_hrefs()
-        rounds = {}
-        for round_name, link in round_results_links.items():
-            if round_name in ignore:
-                print(f"{round_name} has already been scraped. Skipping")
+        rounds_details = self._get_rounds_details()
+        rounds = []
+        # each item in items should be {"round_name" :  $ROUND_NAME, "playlist_link" : $LINK, "results": [LIST_OF_RESULTS]}
+        for round in rounds_details:
+            if round['round_name'] in ignore:
+                print(f"{round['round_name']} has already been scraped. Skipping")
                 continue
-            print(f"Getting rounds results for {round_name}")
-            rounds[round_name] = self._get_round_results(link)
+            print(f"Getting rounds results for {round['round_name']}")
+            round_item = {}
+            round_item['round_name'] = round['round_name']
+            round_item["playlist_link"] = round['round_playlist_href']
+            round_item["results"] = []
+            round_result = self._get_round_results(round['round_href'])
+            round_item['results'] = round_result
+            rounds.append(round_item)
 
         return rounds
 
-    def _get_rounds_hrefs(self):
+    def _get_rounds_details(self):
         print("Getting links for all completed rounds")
         rounds_div_container = self._get_rounds_div_container()
         child_tags = rounds_div_container.contents
-        round_results_hrefs = {}
+        rounds = []
         # 1st child is a <h4> tag with text "Completed Rounds"
         # For some reason second child is an empty string??
         # Start the loop at the 3rd element and grab all the hrefs
         MUSIC_LEAGUE_BASE_URL = "https://app.musicleague.com"
         for child_tag in child_tags[2:]:
+            round_details = {}
             round_name = child_tag.find("h5").get_text()
+            round_details['round_name'] = round_name
             # hrefs are stored as relative urls so we need to prepend base url
             # First <a> tag is a link to the playlist and the second <a> tag is the results href
+            links = child_tag.find_all('a')
             round_result_href = (
-                f"{MUSIC_LEAGUE_BASE_URL}{child_tag.find_all('a')[1]['href']}"
+                f"{MUSIC_LEAGUE_BASE_URL}{links[1]['href']}"
             )
-            round_results_hrefs[round_name] = round_result_href
+            round_details['round_href'] = round_result_href
+            # First link is link to playlist
+            round_details['round_playlist_href'] = links[0]['href']
+            rounds.append(round_details)
 
-        for round_name, round_href in round_results_hrefs.items():
-            print(f"{round_name} - {round_href}")
+        for round in rounds:
+            print(f"{round['round_name']} - {round['round_href']}, {round['round_playlist_href']}")
 
-        return round_results_hrefs
+        return rounds
 
     def _get_rounds_div_container(self):
         soup = BeautifulSoup(self.browser.page_source, "html.parser")
@@ -74,6 +86,7 @@ class Scraper:
         # First child div is the round name so we don't need it
         # Second child is an empty string?? idk why
         for submission_div in submission_divs[2:]:
+            # Each submission should be {"song": $SONG, "artist": $ARTIST, "submitter_name": $NAME, "number_of_votes": $NUM, "voters": [{"voter_name": $NAME, "num_of_votes": $NUM}]}
             submission = {}
             submission["song"] = self._get_song_name(submission_div)
             submission["artist"] = self._get_artist_name(submission_div)
@@ -115,13 +128,13 @@ class Scraper:
         return int(str(number_of_votes))
 
     def _get_voters(self, submission_div):
-        voters = {}
+        voters = []
         # voter divs start at the 5th div and each div holds voter info
         for voter_div_container in submission_div.contents[4:]:
             voter_name = voter_div_container.find("span", class_="fs-6").get_text()
             try:
                 voter_span = voter_div_container.find("span", class_="fs-5")
-                num_of_upvotes = 0
+                num_of_votes = 0
                 # When it is a positive number of votes, the vote number is nested in a span within a span
                 # Ex:
                 # 
@@ -129,13 +142,17 @@ class Scraper:
                 #   <span class="">+1</span>
                 # </span>
                 if isinstance(voter_span.contents[0], bs4.element.Tag):
-                    num_of_upvotes = int(str(voter_span.contents[0].contents[0]))
+                    num_of_votes = int(str(voter_span.contents[0].contents[0]))
 
                 # When it is a negative number of votes, the vote number is the contents of the fs-5 span
                 # <span class="d-inline-block align-middle mx-2 fs-5" style="color: red;">-1</span>
                 else:
-                    num_of_upvotes = int(str(voter_span.contents[0]))
-                voters[voter_name] = num_of_upvotes
+                    num_of_votes = int(str(voter_span.contents[0]))
+
+                voter = {}
+                voter['voter_name'] = voter_name
+                voter['num_of_votes'] = num_of_votes
+                voters.append(voter)
             except AttributeError:
                 # If someone comments they still show up as a child element of the submission_div
                 # However there will be no span with class fs-5 so we get attribute error
