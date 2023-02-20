@@ -5,3 +5,4 @@ __pycache__
 samconfig.toml
 venv
 env
+run.sh
