@@ -121,16 +121,17 @@ class Scraper:
 
     def _get_number_of_votes(self, submission_div):
         song_info_div_container = submission_div.contents[0]
-        voting_info_div = song_info_div_container.contents[4]
-        number_of_votes = voting_info_div.find("span").get_text()
+        voting_info_div_container = song_info_div_container.contents[2].contents[0]
+        voting_info_div = voting_info_div_container.contents[2].contents[0]
+        number_of_votes = voting_info_div.contents[0]
 
         # Convert number of votes to an int. Votes can be positive or negative
         return int(str(number_of_votes))
 
     def _get_voters(self, submission_div):
         voters = []
-        # voter divs start at the 5th div and each div holds voter info
-        for voter_div_container in submission_div.contents[4:]:
+        # voter divs start at the 7th div and each div holds voter info
+        for voter_div_container in submission_div.contents[6:]:
             voter_name = voter_div_container.find("span", class_="fs-6").get_text()
             try:
                 voter_span = voter_div_container.find("span", class_="fs-5")
