@@ -16,7 +16,7 @@ def main():
         music_league_authenticator.authenticate()
         scraper = Scraper(browser)
         s3_service = S3Service()
-        rounds_results = scraper.scrape_rounds(ignore=s3_service.existing_round_names)
+        rounds_results = scraper.scrape_rounds(ignore=s3_service.existing_round_links)
         _pretty_print_rounds_results(rounds_results)
         s3_service.write_rounds_results(rounds_results)
     finally:

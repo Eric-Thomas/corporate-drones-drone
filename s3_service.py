@@ -1,29 +1,37 @@
 import json
 
 import boto3
+from botocore.exceptions import ClientError
 
 S3_BUCKET = "corporate-drones-music-league"
-OBJECT_KEY = "dictator_league.json"
+OBJECT_KEY = "music_league_rounds.json"
 
 
 class S3Service:
     def __init__(self):
         self.client = boto3.client("s3")
         self.existing_json_body = self.get_existing_json_body()
-        self.existing_round_names = self.get_existing_rounds_names()
+        self.existing_round_links = self.get_existing_rounds_links()
 
     def get_existing_json_body(self):
-        return json.load(
-            self.client.get_object(Bucket=S3_BUCKET, Key=OBJECT_KEY)["Body"]
-        )
+        try:
+             return json.load(
+                self.client.get_object(Bucket=S3_BUCKET, Key=OBJECT_KEY)["Body"]
+            )
+        except ClientError as ex:
+            if ex.response['Error']['Code'] == 'NoSuchKey':
+                print('No object found - returning default json')
+                return {"rounds": []}
+            else:
+                raise
 
-    def get_existing_rounds_names(self):
+    def get_existing_rounds_links(self):
         print("Getting existing rounds")
         existing_rounds = []
         for round in self.existing_json_body["rounds"]:
-            existing_rounds.append(round['round_name'])
+            print(f"existing round {round['round_name']} - {round['round_href']}")
+            existing_rounds.append(round['round_href'])
 
-        print(f"Existing rounds {existing_rounds}")
         return existing_rounds
 
     def write_rounds_results(self, rounds_results):

@@ -17,13 +17,15 @@ class Scraper:
         rounds = []
         # each item in items should be {"round_name" :  $ROUND_NAME, "playlist_link" : $LINK, "results": [LIST_OF_RESULTS]}
         for round in rounds_details:
-            if round['round_name'] in ignore:
+            # Ignore rounds already scraped
+            if round['round_href'] in ignore:
                 print(f"{round['round_name']} has already been scraped. Skipping")
                 continue
             print(f"Getting rounds results for {round['round_name']}")
             round_item = {}
             round_item['round_name'] = round['round_name']
             round_item["playlist_link"] = round['round_playlist_href']
+            round_item['round_href'] = round['round_href']
             round_item["results"] = []
             round_result = self._get_round_results(round['round_href'])
             round_item['results'] = round_result
