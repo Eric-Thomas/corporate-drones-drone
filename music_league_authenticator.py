@@ -23,7 +23,7 @@ class MusicLeagueAuthenticator:
     def __init__(self, browser: Chrome):
         self.browser = browser
 
-    def authenticate(self, callback_url=THIRD_TIMES_THE_MAKE_URL):
+    def authenticate(self, callback_url=THE_LEAGUE_IS_SO_BACK_URL):
         self.browser.get(callback_url)
         self._go_to_spotify_login()
         self._enter_spotify_credentials()
@@ -70,9 +70,8 @@ class MusicLeagueAuthenticator:
             raise SpotifyAuthenticationException()
 
     def _agree_to_authenticate(self):
-        # Crazy CSS selector. Hoping this doesn't change or it will break everything lol
         agree_button = self.browser.find_element(
-            By.CSS_SELECTOR, ".Type__TypeElement-goli3j-0.dmuHFl.sc-iCfMLu.cRxwZP"
+            By.CSS_SELECTOR, 'button[data-testid="auth-accept"]'
         )
         agree_button.click()
         time.sleep(5)
