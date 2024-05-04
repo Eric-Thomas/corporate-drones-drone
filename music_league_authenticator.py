@@ -32,7 +32,7 @@ class MusicLeagueAuthenticator:
         self._agree_to_authenticate()
 
     def _go_to_spotify_login(self):
-        login_button = self.browser.find_element(By.LINK_TEXT, "Log In With Spotify")
+        login_button = self.browser.find_element(By.LINK_TEXT, "Log in with Spotify")
         print("Clicking on login button")
         login_button.click()
 
