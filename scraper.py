@@ -19,17 +19,17 @@ class Scraper:
         # each item in items should be {"round_name" :  $ROUND_NAME, "playlist_link" : $LINK, "results": [LIST_OF_RESULTS]}
         for round in rounds_details:
             # Ignore rounds already scraped
-            if round['round_href'] in ignore:
+            if round["round_href"] in ignore:
                 print(f"{round['round_name']} has already been scraped. Skipping")
                 continue
             print(f"Getting rounds results for {round['round_name']}")
             round_item = {}
-            round_item['round_name'] = round['round_name']
-            round_item["playlist_link"] = round['round_playlist_href']
-            round_item['round_href'] = round['round_href']
+            round_item["round_name"] = round["round_name"]
+            round_item["playlist_link"] = round["round_playlist_href"]
+            round_item["round_href"] = round["round_href"]
             round_item["results"] = []
-            round_result = self._get_round_results(round['round_href'])
-            round_item['results'] = round_result
+            round_result = self._get_round_results(round["round_href"])
+            round_item["results"] = round_result
             rounds.append(round_item)
 
         return rounds
@@ -49,23 +49,27 @@ class Scraper:
                 continue
             round_details = {}
             round_name = child_tag.find("h5").get_text()
-            round_details['round_name'] = round_name
+            round_details["round_name"] = round_name
             # hrefs are stored as relative urls so we need to prepend base url
             # First <a> tag is a link to the playlist and the second <a> tag is the results href
-            links = child_tag.find_all('a')
+            links = child_tag.find_all("a")
             round_result_href = (
                 f"{MUSIC_LEAGUE_BASE_URL}{links[ROUND_RESULT_HREF_INDEX]['href']}"
             )
             # Remove last / to keep hrefs consistent
             if round_result_href[-1] == "/":
                 round_result_href = round_result_href[:-1]
-            round_details['round_href'] = round_result_href
+            round_details["round_href"] = round_result_href
             # First link is link to playlist
-            round_details['round_playlist_href'] = links[SPOTIFY_PLAYLIST_HREF_INDEX]['href']
+            round_details["round_playlist_href"] = links[SPOTIFY_PLAYLIST_HREF_INDEX][
+                "href"
+            ]
             rounds.append(round_details)
 
         for round in rounds:
-            print(f"{round['round_name']} - {round['round_href']}, {round['round_playlist_href']}")
+            print(
+                f"{round['round_name']} - {round['round_href']}, {round['round_playlist_href']}"
+            )
 
         return rounds
 
@@ -89,7 +93,9 @@ class Scraper:
         # TODO: Need to figure out a way to find out when javascript has loaded round info
         time.sleep(5)
         soup = BeautifulSoup(self.browser.page_source, "html.parser")
-        results_div_container = soup.find_all("div", class_="col-12 col-lg-8 offset-lg-2")
+        results_div_container = soup.find_all(
+            "div", class_="col-12 col-lg-8 offset-lg-2"
+        )
         # skip first element which is the round title info
         submission_divs: List[Tag] = results_div_container[1].contents
         submissions = []
@@ -119,19 +125,25 @@ class Scraper:
     def _get_artist_name(self, submission_div: Tag) -> str:
         song_info_div_container: Tag = submission_div.contents[1]
         song_info_div: Tag = song_info_div_container.contents[1]
-        artist_name = song_info_div.find("p", class_="card-text m-0 text-truncate").get_text()
+        artist_name = song_info_div.find(
+            "p", class_="card-text m-0 text-truncate"
+        ).get_text()
 
         return artist_name
 
     def _get_submitter_name(self, submission_div: Tag) -> str:
         submitter_info_div_container: Tag = submission_div.contents[1]
-        submitter_name: Tag = submitter_info_div_container.find("h6", class_="m-0 text-truncate text-body fw-semibold").get_text()
+        submitter_name: Tag = submitter_info_div_container.find(
+            "h6", class_="m-0 text-truncate text-body fw-semibold"
+        ).get_text()
 
         return submitter_name
 
     def _get_number_of_votes(self, submission_div: Tag) -> int:
         song_info_div_container: Tag = submission_div.contents[1]
-        number_of_votes: str = song_info_div_container.find("h3", class_="m-0").get_text().strip()
+        number_of_votes: str = (
+            song_info_div_container.find("h3", class_="m-0").get_text().strip()
+        )
 
         # When a person doesn't vote the number of votes is of the form
         # '<number of votes>\n           <numbe of votes removing upvotes>
@@ -151,12 +163,14 @@ class Scraper:
         for voter_row in voter_div_container:
             if voter_row == "\n":
                 continue
-            voter_name = voter_row.find("b", class_="d-block text-truncate text-body").get_text()
+            voter_name = voter_row.find(
+                "b", class_="d-block text-truncate text-body"
+            ).get_text()
             try:
                 num_of_votes = int(voter_row.find("h6", class_="m-0").get_text())
                 voter = {}
-                voter['voter_name'] = voter_name
-                voter['num_of_votes'] = num_of_votes
+                voter["voter_name"] = voter_name
+                voter["num_of_votes"] = num_of_votes
                 voters.append(voter)
             except AttributeError:
                 # If someone comments they still show up as a child element of the submission_div

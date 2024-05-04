@@ -15,12 +15,12 @@ class S3Service:
 
     def get_existing_json_body(self):
         try:
-             return json.load(
+            return json.load(
                 self.client.get_object(Bucket=S3_BUCKET, Key=OBJECT_KEY)["Body"]
             )
         except ClientError as ex:
-            if ex.response['Error']['Code'] == 'NoSuchKey':
-                print('No object found - returning default json')
+            if ex.response["Error"]["Code"] == "NoSuchKey":
+                print("No object found - returning default json")
                 return {"rounds": []}
             else:
                 raise
@@ -30,7 +30,7 @@ class S3Service:
         existing_rounds = []
         for round in self.existing_json_body["rounds"]:
             print(f"existing round {round['round_name']} - {round['round_href']}")
-            existing_rounds.append(round['round_href'])
+            existing_rounds.append(round["round_href"])
 
         return existing_rounds
 
